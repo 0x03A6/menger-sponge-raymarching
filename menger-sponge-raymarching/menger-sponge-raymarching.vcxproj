@@ -137,10 +137,6 @@
     <ClInclude Include="sponge.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="readme.md">
-      <SubType>
-      </SubType>
-    </None>
     <None Include="shader.frag" />
     <None Include="shader.vert" />
   </ItemGroup>
