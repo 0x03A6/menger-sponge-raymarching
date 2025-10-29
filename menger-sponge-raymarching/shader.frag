@@ -4,14 +4,15 @@ out vec4 FragColor;
 in vec2 pos;
 
 uniform mat4 view_inv;
-uniform ivec3 blocks[16];  // 改为ivec3，因为GLSL没有i8vec3
+uniform ivec3 blocks[80];  // 改为ivec3，因为GLSL没有i8vec3
 
 #define MAX_ITER 10
-#define MAX_BLOCKS 16
+#define MAX_BLOCKS 80
 #define INF 10000000.0
 #define CUTOFF_DIST_FAR 1000.0
-#define CUTOFF_DIST_NEAR 0.0001
+#define CUTOFF_DIST_NEAR 0.0005
 #define EPSILON 0.0001
+#define WINDOW_ASPECT_RATIO 1.777777777777777777777
 
 float sdBox(vec3 p) {
     vec3 q = abs(p) - 1.5;
@@ -112,7 +113,7 @@ vec3 calcNormal(vec3 p) {
 void main() {
     vec3 ro_world = vec3(view_inv[3]);
     vec2 uv = pos.xy;
-    uv.x *= 1000.0 / 1000.0; // 假设分辨率1000x1000
+    uv.x *= WINDOW_ASPECT_RATIO;
     
     vec3 rd_camera = normalize(vec3(uv, -1.0));
     vec3 rd_world = normalize(mat3(view_inv) * rd_camera);

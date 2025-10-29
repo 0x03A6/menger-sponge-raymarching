@@ -16,6 +16,10 @@
 #include "Camera.h"
 #include "sponge.h"
 
+constexpr int WINDOW_WIDTH = 3200;
+constexpr int WINDOW_HEIGHT = 1800;
+constexpr double WINDOW_ASPECT_RATIO = static_cast<double>(WINDOW_WIDTH) / WINDOW_HEIGHT;
+
 GLFWwindow* initOpenGL();
 
 GLuint initTriangle(GLuint* VAO);
@@ -54,12 +58,15 @@ int main() {
     // 获取blocks uniform的位置
     GLint blocksLoc = glGetUniformLocation(shader_program, "blocks");
 
+    unsigned char frame_count = 0;
     for (double last_t = glfwGetTime(); !glfwWindowShouldClose(window);) {
         double t = glfwGetTime();
         GLint viewMatInv = glGetUniformLocation(shader_program, "view_inv");
         processInput(t - last_t);
+        frame_count++;
+        if (frame_count == 0)
+			std::cout << "FPS: " << 1.0 / (t - last_t) << std::endl;
         last_t = t;
-
         // 每帧将鼠标移动到屏幕中心
         if (mouseCaptured) {
             glfwSetCursorPos(window, 500, 500);
@@ -72,13 +79,13 @@ int main() {
         glUniformMatrix4fv(viewMatInv, 1, GL_FALSE, glm::value_ptr(camera.getInvViewMatrix()));
 
         // 传递blocks数组到GPU
-        ivec3 blockArray[16];
+        ivec3 blockArray[BLOCK_AMOUNT];
         auto it = --blocks.end();
         for (int i = 0; i < 16; i++) {
             blockArray[i] = ivec3(*it);
             --it;
         }
-        glUniform3iv(blocksLoc, 16, glm::value_ptr(blockArray[0]));
+        glUniform3iv(blocksLoc, BLOCK_AMOUNT_GPU, glm::value_ptr(blockArray[0]));
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -101,8 +108,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GL_TRUE);
 
     // Alt键切换鼠标捕获状态
-    if ((key == GLFW_KEY_LEFT_ALT || key == GLFW_KEY_RIGHT_ALT) && action == GLFW_PRESS) {
-        mouseCaptured = !mouseCaptured;
+    if ((key == GLFW_KEY_LEFT_ALT || key == GLFW_KEY_RIGHT_ALT)) {
+        if (action == GLFW_PRESS)
+            mouseCaptured = false;
+		else if (action == GLFW_RELEASE)
+			mouseCaptured = true;
         if (mouseCaptured) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             // 重置鼠标位置到中心
@@ -159,7 +169,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 // 处理连续按键输入的函数（在渲染循环中调用）
 void processInput(float deltaTime) {
-    float moveSpeed = 2.0f * deltaTime * sdMenger(camera.getPos()); // 调整移动速度
+    float moveSpeed = 1.0f * deltaTime * sdMenger(camera.getPos()); // 调整移动速度
 
     // 地平面移动（WASD）
     if (keys[GLFW_KEY_W])
@@ -188,7 +198,7 @@ GLFWwindow* initOpenGL() {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // create window
-    GLFWwindow* window = glfwCreateWindow(2000, 2000, "Menger Sponge", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Menger Sponge", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();

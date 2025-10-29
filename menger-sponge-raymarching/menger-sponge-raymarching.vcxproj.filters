@@ -49,5 +49,6 @@
     <None Include="shader.frag">
       <Filter>源文件</Filter>
     </None>
+    <None Include="readme.md" />
   </ItemGroup>
 </Project>

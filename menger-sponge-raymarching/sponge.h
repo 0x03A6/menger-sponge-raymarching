@@ -8,7 +8,8 @@
 using namespace glm;
 
 constexpr int MAX_ITER = 15;
-constexpr int BLOCK_AMOUNT = 17;
+constexpr int BLOCK_AMOUNT = 100;
+constexpr int BLOCK_AMOUNT_GPU = 80;
 
 float sdBox(vec3 p) {
     vec3 q = abs(p) - 1.5f;
