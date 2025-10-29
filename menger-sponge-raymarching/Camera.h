@@ -18,6 +18,6 @@ public:
 	void moveUp(float delta);
 	void rotateYaw(float angle);
 	void rotatePitch(float angle);
-	vec3 getPos() const;
+	vec3 &getPos();
 	mat4 getInvViewMatrix();
 };

@@ -47,7 +47,7 @@ void Camera::rotatePitch(float angle) {
     up = glm::normalize(glm::cross(right, sight));
 }
 
-vec3 Camera::getPos() const {
+vec3 &Camera::getPos() {
     return pos;
 }
 

@@ -49,6 +49,11 @@ int main() {
     // 设置初始鼠标位置到中心
     glfwSetCursorPos(window, lastX, lastY);
 
+    initFractal();
+
+    // 获取blocks uniform的位置
+    GLint blocksLoc = glGetUniformLocation(shader_program, "blocks");
+
     for (double last_t = glfwGetTime(); !glfwWindowShouldClose(window);) {
         double t = glfwGetTime();
         GLint viewMatInv = glGetUniformLocation(shader_program, "view_inv");
@@ -66,12 +71,23 @@ int main() {
 
         glUniformMatrix4fv(viewMatInv, 1, GL_FALSE, glm::value_ptr(camera.getInvViewMatrix()));
 
+        // 传递blocks数组到GPU
+        ivec3 blockArray[16];
+        auto it = --blocks.end();
+        for (int i = 0; i < 16; i++) {
+            blockArray[i] = ivec3(*it);
+            --it;
+        }
+        glUniform3iv(blocksLoc, 16, glm::value_ptr(blockArray[0]));
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         glfwPollEvents();
         glfwSwapBuffers(window);
+
+        updateFractal(camera.getPos());
     }
 
     glfwTerminate();
