@@ -7,7 +7,7 @@
 
 using namespace glm;
 
-constexpr int MAX_ITER = 15;
+constexpr int MAX_ITER = 30;
 constexpr int BLOCK_AMOUNT = 100;
 constexpr int BLOCK_AMOUNT_GPU = 80;
 
@@ -76,8 +76,8 @@ i8vec3 getRandIdx() {
 
 std::deque<i8vec3> blocks;
 
-void initBlocks() {
-	srand((unsigned int)time(NULL));
+void initBlocks(const unsigned int rand_seed) {
+	srand(rand_seed);
     for (int i = 0; i < BLOCK_AMOUNT; i++) {
 		blocks.push_back(getRandIdx());
     }
@@ -97,8 +97,8 @@ void updateBlock(vec3 &pos) {
     }
 }
 
-void initFractal() {
-	initBlocks();
+void initFractal(const unsigned int rand_seed) {
+	initBlocks(rand_seed);
 }
 
 void updateFractal(vec3 &pos) {

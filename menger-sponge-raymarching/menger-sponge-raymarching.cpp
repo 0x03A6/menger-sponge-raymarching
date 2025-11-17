@@ -36,7 +36,7 @@ float lastX = 500, lastY = 500; // 初始化为窗口中心
 bool firstMouse = true;
 bool mouseCaptured = true; // 鼠标是否被捕获
 
-int main() {
+int main(int argc, char *argv[]) {
     GLFWwindow* window = initOpenGL();
 
     GLuint VAO;
@@ -53,8 +53,15 @@ int main() {
     // 设置初始鼠标位置到中心
     glfwSetCursorPos(window, lastX, lastY);
 
-    initFractal();
-
+    unsigned int seed;
+    if (argc == 2) {
+        sscanf(argv[1], "%u", &seed);
+    }
+    else {
+		seed = static_cast<unsigned int>(time(nullptr));
+    }
+    std::cout << "Random seed: " << seed << std::endl;
+    initFractal(seed);
     // 获取blocks uniform的位置
     GLint blocksLoc = glGetUniformLocation(shader_program, "blocks");
 
