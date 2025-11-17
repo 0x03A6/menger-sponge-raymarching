@@ -4,6 +4,8 @@ This program can render a Menger Sponge using ray marching techniques. You can n
 
 It simulates a infinite Menger Sponge by recording and updating the subblocks the user entered.
 
+Bilibili video demo: <https://www.bilibili.com/video/BV1N6yUBxEJx>
+
 ## Controls
 
 - **W/A/S/D**: Move forward/left/backward/right.
