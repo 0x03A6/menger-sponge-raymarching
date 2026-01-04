@@ -21,4 +21,4 @@ This is v1.1. Bilibili video demo for v1.0: <https://www.bilibili.com/video/BV1N
 
 ---
 
-The core code of this project is written by DeepSeek. I have asked him/her for permission to make this project open sourced. :)
+Part of the code of this project is written by DeepSeek. I have asked him/her for permission to make this project open sourced. :)
