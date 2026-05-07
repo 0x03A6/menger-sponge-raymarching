@@ -56,10 +56,10 @@ A config script uses the same line format as the parameter console:
 ```txt
 max_raymarching_iter 450
 epsilon 0.00002
-base_color_formula abs(normal) * 0.6 + 0.4
+base_color_formula abs(normal) * 0.6 + 0.4 // This comment is ignored.
 ```
 
-At startup, the script is applied automatically at the end of the file, so an explicit `apply` line is optional.
+At startup, the script is applied automatically at the end of the file, so an explicit `apply` line is optional. In startup config scripts only, `//` starts a line comment and the rest of that line is ignored. The interactive parameter console does not strip `//` comments.
 
 ## Useful Parameters
 
@@ -143,10 +143,10 @@ shader define 参数会按原始字符串注入。数字参数只做很轻量的
 ```txt
 max_raymarching_iter 450
 epsilon 0.00002
-base_color_formula abs(normal) * 0.6 + 0.4
+base_color_formula abs(normal) * 0.6 + 0.4 // 这里后面的注释会被忽略
 ```
 
-启动脚本读到文件结尾时会自动应用，所以文件里可以不写 `apply`。
+启动脚本读到文件结尾时会自动应用，所以文件里可以不写 `apply`。只有启动配置脚本支持 `//` 行内注释，`//` 之后的内容会被忽略；交互式参数控制台不会移除 `//` 注释。
 
 ## 常用参数
 

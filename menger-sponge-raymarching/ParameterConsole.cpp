@@ -20,6 +20,14 @@ bool isBlankLine(const std::string& line) {
     return true;
 }
 
+std::string stripScriptComment(const std::string& line) {
+    const std::size_t comment_begin = line.find("//");
+    if (comment_begin == std::string::npos)
+        return line;
+
+    return line.substr(0, comment_begin);
+}
+
 std::string trim(const std::string& text) {
     std::size_t begin = 0;
     while (begin < text.size() && std::isspace(static_cast<unsigned char>(text[begin])))
@@ -241,6 +249,7 @@ bool applyParameterScript(
     int line_number = 0;
     while (std::getline(input_stream, command_line)) {
         line_number++;
+        command_line = stripScriptComment(command_line);
 
         if (isBlankLine(command_line))
             continue;
