@@ -18,6 +18,15 @@
     <ClCompile Include="menger-sponge-raymarching.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ParameterConsole.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderConfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ParameterRegistry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -29,6 +38,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ParameterConsole.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ParameterRegistry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -49,5 +67,8 @@
     <None Include="shader.frag">
       <Filter>源文件</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="config.txt" />
   </ItemGroup>
 </Project>

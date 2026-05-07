@@ -7,26 +7,26 @@
 
 using namespace glm;
 
-constexpr int MAX_ITER = 30;
+constexpr int MAX_ITER = 50;
 constexpr int BLOCK_AMOUNT = 100;
 constexpr int BLOCK_AMOUNT_GPU = 80;
 
-float sdBox(vec3 p) {
-    vec3 q = abs(p) - 1.5f;
-    return length(max(q, 0.0f) + min(max(q.x, max(q.y, q.z)), 0.0f));
+double sdBox(dvec3 p) {
+    dvec3 q = abs(p) - 1.5;
+    return length(max(q, 0.0) + min(max(q.x, max(q.y, q.z)), 0.0));
 }
 
-vec3 goOut(vec3 pos, const i8vec3 idx) {
-    return (pos / 3.0f) + vec3(idx);
+dvec3 goOut(dvec3 pos, const i8vec3 idx) {
+    return (pos / 3.0) + dvec3(idx);
 }
 
-vec3 goIn(vec3 pos, const i8vec3 idx) {
-    return (pos - vec3(idx)) * 3.0f;
+dvec3 goIn(dvec3 pos, const i8vec3 idx) {
+    return (pos - dvec3(idx)) * 3.0;
 }
 
 // 门格海绵距离函数
-float sdMenger(vec3 p) {
-    float size = 1.0;
+double sdMenger(dvec3 p) {
+    double size = 1.0;
 
     for (int iter = 0; iter < MAX_ITER; iter++) {
 
@@ -36,9 +36,9 @@ float sdMenger(vec3 p) {
 
         // 门格海绵的核心变换
         if (p.z > 0.5)
-            p -= vec3(1.0, 1.0, 1.0);
+            p -= dvec3(1.0, 1.0, 1.0);
         else
-            p -= vec3(1.0, 1.0, 0.0);
+            p -= dvec3(1.0, 1.0, 0.0);
 
         p *= 3.0;
         size /= 3.0;
@@ -47,7 +47,7 @@ float sdMenger(vec3 p) {
     return sdBox(p) * size;
 }
 
-bool inBlock(vec3 pos) {
+bool inBlock(dvec3 pos) {
 	return pos.x >= -1.5f && pos.x <= 1.5f &&
            pos.y >= -1.5f && pos.y <= 1.5f &&
 		   pos.z >= -1.5f && pos.z <= 1.5f;
@@ -62,8 +62,8 @@ bool inSponge(i8vec3 pos) {
     return (pos.y != 0 && pos.z != 0);
 }
 
-i8vec3 getIdx(vec3 pos) {
-    return i8vec3(pos + 1.5f) - (int8)1;
+i8vec3 getIdx(dvec3 pos) {
+    return i8vec3(pos + 1.5) - (i8vec3)1;
 }
 
 i8vec3 getRandIdx() {

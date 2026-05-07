@@ -1,5 +1,7 @@
 #pragma once
-#include <iostream>
+
+#include <string>
+#include <unordered_map>
 
 // GLEW
 #define GLEW_STATIC
@@ -11,25 +13,25 @@
 class Shader {
     GLuint shader;
     GLenum shader_type;
+    std::string last_error;
 
 public:
-
-    // create and compile
     Shader(const char* const src, const GLenum shader_type_);
-
-    // create
     Shader(const GLenum shader_type);
 
-    void compileFile(const char* path);
+    bool compileFile(const char* path);
+    bool compileFile(const char* path, const std::unordered_map<std::string, std::string>& replacements);
+    bool compile(const char* const src);
+    bool compile(const std::string& src);
 
-    // set source code and compile
-    void compile(const char* const src);
+    void attach(const GLuint shader_program) const;
 
-    // attach to program
-    void attach(const GLuint shader_program);
+    GLuint getShaderId() const;
+    const std::string& getLastError() const;
 
-    GLuint getShaderId();
-
-    // delete
     ~Shader();
+
+private:
+    static bool readFileText(const char* path, std::string& source, std::string& error_message);
+    static void applyReplacements(std::string& source, const std::unordered_map<std::string, std::string>& replacements);
 };

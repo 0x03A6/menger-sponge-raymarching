@@ -1,55 +1,89 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include "Shader.h"
 
-// create and compile
-Shader::Shader(const char* const src, const GLenum shader_type_) :shader_type(shader_type_) {
+#include <fstream>
+#include <sstream>
+
+Shader::Shader(const char* const src, const GLenum shader_type_) : shader_type(shader_type_) {
     shader = glCreateShader(shader_type_);
     compile(src);
 }
 
-Shader::Shader(const GLenum shader_type_) :shader_type(shader_type_) {
+Shader::Shader(const GLenum shader_type_) : shader_type(shader_type_) {
     shader = glCreateShader(shader_type_);
 }
 
-void Shader::compileFile(const char* path) {
-    FILE* src_file = fopen(path, "r");
-
-    // 获取文件大小（字节）
-    fseek(src_file, 0, SEEK_END);
-    const unsigned int src_size = ftell(src_file);
-    rewind(src_file);
-
-    char* src = new char[(size_t)src_size + 1]; // plus one for \0
-    fread(src, 1, src_size, src_file);
-    src[src_size] = '\0';
-    compile(src);
-
-    fclose(src_file);
+bool Shader::compileFile(const char* path) {
+    const std::unordered_map<std::string, std::string> replacements;
+    return compileFile(path, replacements);
 }
 
-void Shader::compile(const char* const src) {
-    glShaderSource(shader, 1, &src, NULL);
+bool Shader::compileFile(const char* path, const std::unordered_map<std::string, std::string>& replacements) {
+    std::string source;
+    if (!readFileText(path, source, last_error))
+        return false;
+
+    applyReplacements(source, replacements);
+    return compile(source);
+}
+
+bool Shader::compile(const char* const src) {
+    return compile(std::string(src));
+}
+
+bool Shader::compile(const std::string& src) {
+    const char* source = src.c_str();
+    glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
+
     GLint success;
-    GLchar info_log[512];
+    GLchar info_log[1024];
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(shader, sizeof info_log, NULL, info_log);
-        std::cout << "shader complication failed.\n" << info_log << std::endl;
+        glGetShaderInfoLog(shader, sizeof info_log, nullptr, info_log);
+        last_error = info_log;
+        return false;
     }
+
+    last_error.clear();
+    return true;
 }
 
-// attach to program
-void Shader::attach(const GLuint shader_program) {
+void Shader::attach(const GLuint shader_program) const {
     glAttachShader(shader_program, shader);
 }
 
-GLuint Shader::getShaderId() {
+GLuint Shader::getShaderId() const {
     return shader;
 }
 
-// delete
+const std::string& Shader::getLastError() const {
+    return last_error;
+}
+
 Shader::~Shader() {
     glDeleteShader(shader);
+}
+
+bool Shader::readFileText(const char* path, std::string& source, std::string& error_message) {
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open()) {
+        error_message = std::string("failed to open shader file: ") + path;
+        return false;
+    }
+
+    std::ostringstream stream;
+    stream << file.rdbuf();
+    source = stream.str();
+    error_message.clear();
+    return true;
+}
+
+void Shader::applyReplacements(std::string& source, const std::unordered_map<std::string, std::string>& replacements) {
+    for (const auto& replacement : replacements) {
+        std::size_t position = 0;
+        while ((position = source.find(replacement.first, position)) != std::string::npos) {
+            source.replace(position, replacement.first.size(), replacement.second);
+            position += replacement.second.size();
+        }
+    }
 }

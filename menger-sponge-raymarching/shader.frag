@@ -1,87 +1,96 @@
-#version 330 core
+#version 430 core
+
+// ÊúÄÂºÄÂßãÂÖàÁî®‰∏Ä‰∏™ÊØîËæÉÂ∞èÁöÑËø≠‰ª£Ê¨°Êï∞ËøõË°åÁ≤óÁï•ÁöÑË∑ùÁ¶ª‰º∞ËÆ°
+// ‰πãÂêéËøõË°åÁ≤æÁ°ÆËÆ°ÁÆóÔºåËø≠‰ª£Ê¨°Êï∞Ê†πÊçÆË∑ùÁ¶ªËøúËøëÂä®ÊÄÅË∞ÉÊï¥
+
+#define LN3 1.0986122886681098  // ln(3)
+
+#define MAX_BLOCKS 80
+#define INF 10000000.0
+
+/*
+#define MAX_ITER_ROUGH 5        // Á≤óÁï•‰º∞ËÆ°Ëø≠‰ª£Ê¨°Êï∞
+#define MAX_ITER_RELATIVE 6.0   // Á≤æÁ°ÆËÆ°ÁÆóËø≠‰ª£Áõ∏ÂØπÊ¨°Êï∞
+#define MAX_ITER_RELATIVE_CUTOFF 30.0   // Á≤æÁ°ÆËÆ°ÁÆóÊúÄÂ§ßËø≠‰ª£Ê¨°Êï∞
+#define MAX_RAYMARCHING_ITER 350 // ÊúÄÂ§ßÂÖâÁ∫øË°åËøõÊ≠•Êï∞
+#define CUTOFF_DIST_FAR 2000000.0
+#define CUTOFF_DIST_NEAR_ROUGH 0.0001
+#define CUTOFF_DIST_NEAR_RELATIVE 0.00005
+#define EPSILON 0.00001
+#define BASE_COLOR_FORMULA transpose(mat3(view_inv)) * normal * 0.5 + 0.5
+*/
+__CONFIG_DEFINES__
 
 out vec4 FragColor;
 in vec2 pos;
 
 uniform mat4 view_inv;
-uniform ivec3 blocks[80];  // ∏ƒŒ™ivec3£¨“ÚŒ™GLSL√ª”–i8vec3
-
-// ◊Óø™ ºœ»”√“ª∏ˆ±»Ωœ–°µƒµ¸¥˙¥Œ ˝Ω¯––¥÷¬‘µƒæ‡¿Îπ¿º∆
-// ÷Æ∫ÛΩ¯––æ´»∑º∆À„£¨µ¸¥˙¥Œ ˝∏˘æ›æ‡¿Î‘∂Ω¸∂ØÃ¨µ˜’˚
-
-#define LN3 1.0986122886681098  // ln(3)
-
-#define MAX_ITER_ROUGH 5        // ¥÷¬‘π¿º∆µ¸¥˙¥Œ ˝
-#define MAX_ITER_RELATIVE 6.0   // æ´»∑º∆À„µ¸¥˙œ‡∂‘¥Œ ˝
-#define MAX_ITER_RELATIVE_CUTOFF 30.0   // æ´»∑º∆À„◊Ó¥Ûµ¸¥˙¥Œ ˝
-#define MAX_RAYMARCHING_ITER 350 // ◊Ó¥Ûπ‚œﬂ––Ω¯≤Ω ˝
-#define MAX_BLOCKS 80
-#define INF 10000000.0
-#define CUTOFF_DIST_FAR 2000.0
-#define CUTOFF_DIST_NEAR_ROUGH 0.0001
-#define CUTOFF_DIST_NEAR_RELATIVE 0.00005
-#define EPSILON 0.00001
-#define WINDOW_ASPECT_RATIO 1.777777777777777777777
+uniform float aspect_ratio;
+uniform ivec3 blocks[MAX_BLOCKS];  // Êîπ‰∏∫ivec3ÔºåÂõ†‰∏∫GLSLÊ≤°Êúâi8vec3
 
 float sdBox(vec3 p) {
     vec3 q = abs(p) - 1.5;
     return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
 }
 
-// ≈–∂œµ„ «∑Ò‘⁄øÈƒ⁄
+// Âà§Êñ≠ÁÇπÊòØÂê¶Âú®ÂùóÂÜÖ
 bool inBlock(vec3 pos) {
     return pos.x >= -1.5 && pos.x <= 1.5 &&
            pos.y >= -1.5 && pos.y <= 1.5 &&
            pos.z >= -1.5 && pos.z <= 1.5;
 }
 
-// ≈–∂œøÈÀ˜“˝ «∑Ò‘⁄√≈∏Ò∫£√‡÷–
+// Âà§Êñ≠ÂùóÁ¥¢ÂºïÊòØÂê¶Âú®Èó®Ê†ºÊµ∑Áªµ‰∏≠
 bool inSponge(ivec3 idx) {
     if (idx.x != 0)
         return (idx.y != 0 || idx.z != 0);
     return (idx.y != 0 && idx.z != 0);
 }
 
-// œÚÕ‚≤„±‰ªª
+// ÂêëÂ§ñÂ±ÇÂèòÊç¢
 vec3 goOut(vec3 pos, ivec3 idx) {
     return (pos / 3.0) + vec3(idx);
 }
 
-// œÚƒ⁄≤„±‰ªª  
+// ÂêëÂÜÖÂ±ÇÂèòÊç¢
 vec3 goIn(vec3 pos, ivec3 idx) {
     return (pos - vec3(idx)) * 3.0;
 }
 
-// ¥”◊¯±ÍªÒ»°øÈÀ˜“˝
+// ‰ªéÂùêÊ†áËé∑ÂèñÂùóÁ¥¢Âºï
 ivec3 getIdx(vec3 pos) {
     return ivec3(floor(pos + 1.5)) - 1;
 }
 
-// Œﬁœﬁ≤„¥Œ√≈∏Ò∫£√‡æ‡¿Î∫Ø ˝
+float current_size = 1.0;
+
+// Êó†ÈôêÂ±ÇÊ¨°Èó®Ê†ºÊµ∑ÁªµË∑ùÁ¶ªÂáΩÊï∞
 float sdInfiniteMenger(vec3 p, int max_iter) {
 
     float size = 1.0;
 
-    // ¥”◊Óƒ⁄≤„ø™ º
+    // ‰ªéÊúÄÂÜÖÂ±ÇÂºÄÂßã
     int currentLevel = 0;
     
-    // ”¶”√≤„¥Œ±‰ªª£¨÷±µΩ’“µΩ’˝»∑µƒ≤„¥Œ
-    while (currentLevel < MAX_BLOCKS - 1) {
+    // Â∫îÁî®Â±ÇÊ¨°ÂèòÊç¢ÔºåÁõ¥Âà∞ÊâæÂà∞Ê≠£Á°ÆÁöÑÂ±ÇÊ¨°
+    while (currentLevel < MAX_BLOCKS) {
         if (inBlock(p)) {
             break;
         }
-        // œÚÕ‚“∆∂Ø“ª≤„
+        // ÂêëÂ§ñÁßªÂä®‰∏ÄÂ±Ç
         p = goOut(p, blocks[currentLevel]);
         currentLevel++;
         size *= 3.0;
     }
     
-    // »Áπ˚≥¨≥ˆ¡ÀÀ˘”–≤„¥Œ£¨∑µªÿ¥Ûæ‡¿Î
+    // Â¶ÇÊûúË∂ÖÂá∫‰∫ÜÊâÄÊúâÂ±ÇÊ¨°ÔºåËøîÂõûÂ§ßË∑ùÁ¶ª
     if (!inBlock(p)) {
         return INF;
     }
+
+    current_size = size;
     
-    // œÚƒ⁄“∆∂Ø£¨÷±µΩ’“µΩ◊Ó…Óµƒ µ–ƒøÈ
+    // ÂêëÂÜÖÁßªÂä®ÔºåÁõ¥Âà∞ÊâæÂà∞ÊúÄÊ∑±ÁöÑÂÆûÂøÉÂùó
     /*
     for (int level = currentLevel; level >= 0; level--) {
         ivec3 idx = getIdx(p);
@@ -115,14 +124,14 @@ float sdInfiniteMengerRelative(vec3 p, float max_iter) {
     return sdInfiniteMenger(p, x) * (1.0 - t) + sdInfiniteMenger(p, x + 1) * t;
 }
 
-// º∆À„∑®œÚ¡øµƒ∫Ø ˝
-vec3 calcNormal(vec3 p, float max_iter) {
+// ËÆ°ÁÆóÊ≥ïÂêëÈáèÁöÑÂáΩÊï∞
+vec3 calcNormal(vec3 p, float epsilon, float max_iter) {
     
-    float dx = sdInfiniteMengerRelative(p + vec3(EPSILON, 0, 0), max_iter) - sdInfiniteMengerRelative(p - vec3(EPSILON, 0, 0), max_iter);
-    float dy = sdInfiniteMengerRelative(p + vec3(0, EPSILON, 0), max_iter) - sdInfiniteMengerRelative(p - vec3(0, EPSILON, 0), max_iter);
-    float dz = sdInfiniteMengerRelative(p + vec3(0, 0, EPSILON), max_iter) - sdInfiniteMengerRelative(p - vec3(0, 0, EPSILON), max_iter);
+    float dx = sdInfiniteMengerRelative(p + vec3(epsilon, 0, 0), max_iter) - sdInfiniteMengerRelative(p - vec3(epsilon, 0, 0), max_iter);
+    float dy = sdInfiniteMengerRelative(p + vec3(0, epsilon, 0), max_iter) - sdInfiniteMengerRelative(p - vec3(0, epsilon, 0), max_iter);
+    float dz = sdInfiniteMengerRelative(p + vec3(0, 0, epsilon), max_iter) - sdInfiniteMengerRelative(p - vec3(0, 0, epsilon), max_iter);
     
-    return normalize(vec3(dx / EPSILON, dy / EPSILON, dz / EPSILON));
+    return normalize(vec3(dx / epsilon, dy / epsilon, dz / epsilon));
 }
 
 float calcRelativeIter(float dist) {
@@ -132,29 +141,29 @@ float calcRelativeIter(float dist) {
 void main() {
     vec3 ro_world = vec3(view_inv[3]);
     vec2 uv = pos.xy;
-    uv.x *= WINDOW_ASPECT_RATIO;
+    uv.x *= aspect_ratio;
     
     vec3 rd_camera = normalize(vec3(uv, -1.0));
     vec3 rd_world = normalize(mat3(view_inv) * rd_camera);
     
     float t = 0.0;
-    vec3 hitPoint = vec3(0.0);
     bool hit = false;
 
     vec3 p = ro_world;
+
+    float dist = sdInfiniteMenger(p, int(MAX_ITER_RELATIVE_CUTOFF));
     
     // ROUGH RAY MARCHING
     for (int i = 0; ; i++) {
-        float d = sdInfiniteMenger(p, MAX_ITER_ROUGH);
+        float d = sdInfiniteMenger(vec3(p), MAX_ITER_ROUGH);
         
-        if(d < CUTOFF_DIST_NEAR_ROUGH) {
+        if(d < CUTOFF_DIST_NEAR_ROUGH * t) {
             hit = true;
-            hitPoint = p;
             break;
         }
 
         vec3 temp_p = p + rd_world * d;
-        if (temp_p == p)    // ∏°µ„æ´∂»≤ªπª¡À£¨”⁄ «Õ£÷π
+        if (temp_p == p)    // ÊµÆÁÇπÁ≤æÂ∫¶‰∏çÂ§ü‰∫ÜÔºå‰∫éÊòØÂÅúÊ≠¢
             break;
         p = temp_p;
         t += d;
@@ -171,16 +180,15 @@ void main() {
         // ACCURATE RAY MARCHING
         hit = false;
         for (int i = 0; ; i++) {
-            float d = sdInfiniteMengerRelative(p, calcRelativeIter(t));
+            float d = sdInfiniteMengerRelative(vec3(p), calcRelativeIter(t));
         
             if (d < CUTOFF_DIST_NEAR_RELATIVE * t) {
                 hit = true;
-                hitPoint = p;
                 break;
             }
 
             vec3 temp_p = p + rd_world * d;
-            if (temp_p == p)    // ∏°µ„æ´∂»≤ªπª¡À£¨”⁄ «Õ£÷π
+            if (temp_p == p)    // ÊµÆÁÇπÁ≤æÂ∫¶‰∏çÂ§ü‰∫ÜÔºå‰∫éÊòØÂÅúÊ≠¢
                 break;
             p = temp_p;
             t += d;
@@ -192,12 +200,25 @@ void main() {
                 break;
             }
         }
-        vec3 normal = abs(calcNormal(hitPoint, calcRelativeIter(t)));
-        vec3 color = normal * 0.5 + 0.5;
+        vec3 normal = calcNormal(vec3(p), EPSILON * max(1.0, current_size), calcRelativeIter(t));
+        if (any(isnan(p))) {
+            FragColor = vec4(0.0, 1.0, 1.0, 1.0);
+            return;
+        }
+        vec3 base_color = BASE_COLOR_FORMULA;
+        // vec3 base_color = abs(normal) * 0.6 + 0.4;
+        float dot_result = max(0.0, dot(normal, -rd_world));
+        float relative_dist = dist / t;
+        const vec3 ambient = base_color;
+        const vec3 diffuse = max(base_color * dot_result, vec3(0.0));
+        const vec3 specular = vec3(pow(dot_result, 8.0));
+        vec3 color = 0.6 * ambient + (0.5 * diffuse + 0.1 * specular) * relative_dist * relative_dist;
+        // vec3 color = base_color;
         FragColor = vec4(color, 1.0);
     } else {
         FragColor = vec4(0.1, 0.1, 0.1, 1.0);
     }
+
 }
 
 //
