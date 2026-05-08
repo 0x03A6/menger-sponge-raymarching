@@ -125,26 +125,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ParameterConsole.cpp" />
-    <ClCompile Include="ParameterRegistry.cpp" />
-    <ClCompile Include="RenderConfig.cpp" />
+    <ClCompile Include="core\Camera.cpp" />
+    <ClCompile Include="parameters\ParameterConsole.cpp" />
+    <ClCompile Include="parameters\ParameterRegistry.cpp" />
+    <ClCompile Include="parameters\RenderConfig.cpp" />
     <ClCompile Include="menger-sponge-raymarching.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="render\Shader.cpp" />
+    <ClCompile Include="render\ShaderProgram.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="ParameterConsole.h" />
-    <ClInclude Include="ParameterRegistry.h" />
-    <ClInclude Include="RenderConfig.h" />
-    <ClInclude Include="Shader.h" />
-    <ClInclude Include="ShaderProgram.h" />
-    <ClInclude Include="sponge.h" />
+    <ClInclude Include="core\Camera.h" />
+    <ClInclude Include="core\sponge.h" />
+    <ClInclude Include="parameters\ParameterConsole.h" />
+    <ClInclude Include="parameters\ParameterRegistry.h" />
+    <ClInclude Include="parameters\RenderConfig.h" />
+    <ClInclude Include="render\Shader.h" />
+    <ClInclude Include="render\ShaderProgram.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.frag" />
-    <None Include="shader.vert" />
+    <None Include="shaders\shader.frag" />
+    <None Include="shaders\shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="config.txt" />

@@ -8,7 +8,7 @@ This is v1.2. Bilibili video demo for v1.0: <https://www.bilibili.com/video/BV1N
 
 For normal use, download the release package from the **Releases** section on the right side of the GitHub page. The package contains the executable, shaders, and config files. Extract it, then run the executable from the extracted directory.
 
-You can also build and run the Visual Studio project from the project directory so that `shader.vert`, `shader.frag`, and optional config files can be found with relative paths.
+You can also build and run the Visual Studio project from the project directory so that `shaders/shader.vert`, `shaders/shader.frag`, and optional config files can be found with relative paths.
 
 ```txt
 menger-sponge-raymarching.exe
@@ -97,7 +97,7 @@ Available variables around `base_color_formula` include `normal`, `rd_world`, `v
 
 普通使用可以直接在 GitHub 页面右侧的 **Releases** 里下载发布包。发布包里包含可执行文件、shader 和配置文件；解压后在解压目录中运行可执行文件即可。
 
-也可以用 Visual Studio 构建并运行项目。运行目录需要能通过相对路径找到 `shader.vert`、`shader.frag` 和可选配置文件。
+也可以用 Visual Studio 构建并运行项目。运行目录需要能通过相对路径找到 `shaders/shader.vert`、`shaders/shader.frag` 和可选配置文件。
 
 ```txt
 menger-sponge-raymarching.exe

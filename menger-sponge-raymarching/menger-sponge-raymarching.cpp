@@ -20,12 +20,12 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include "ParameterConsole.h"
-#include "ParameterRegistry.h"
-#include "RenderConfig.h"
-#include "ShaderProgram.h"
-#include "Camera.h"
-#include "sponge.h"
+#include "parameters/ParameterConsole.h"
+#include "parameters/ParameterRegistry.h"
+#include "parameters/RenderConfig.h"
+#include "render/ShaderProgram.h"
+#include "core/Camera.h"
+#include "core/sponge.h"
 
 constexpr int DEFAULT_WINDOW_WIDTH = 3200;
 constexpr int DEFAULT_WINDOW_HEIGHT = 1800;
@@ -337,7 +337,7 @@ bool buildRaymarchProgram(const AppConfig& app_config, RaymarchProgram* raymarch
     ShaderProgram shader_program;
 
     Shader vertex_shader(GL_VERTEX_SHADER);
-    if (!vertex_shader.compileFile("./shader.vert")) {
+    if (!vertex_shader.compileFile("./shaders/shader.vert")) {
         error_message = "vertex shader compilation failed:\n" + vertex_shader.getLastError();
         glDeleteProgram(shader_program.getProgramId());
         return false;
@@ -345,7 +345,7 @@ bool buildRaymarchProgram(const AppConfig& app_config, RaymarchProgram* raymarch
     shader_program.attachShader(vertex_shader);
 
     Shader fragment_shader(GL_FRAGMENT_SHADER);
-    if (!fragment_shader.compileFile("./shader.frag", getShaderSourceReplacements(app_config))) {
+    if (!fragment_shader.compileFile("./shaders/shader.frag", getShaderSourceReplacements(app_config))) {
         error_message = "fragment shader compilation failed:\n" + fragment_shader.getLastError();
         glDeleteProgram(shader_program.getProgramId());
         return false;
